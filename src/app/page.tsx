@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "~/env";
+import { TextInput } from "./components/textInput";
 
 const genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
 
@@ -25,8 +26,9 @@ export default function HomePage() {
         <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
           <span className="text-[hsl(280,100%,70%)]">ez</span>Code
         </h1>
-        <div className="mt-12 flex w-full justify-center">
-          <span>hello</span>
+        <div className="mt-12 flex w-full flex-col items-center gap-y-4">
+          <span>Add some code</span>
+          <TextInput />
           {/* <span>{text}</span> */}
         </div>
       </div>
