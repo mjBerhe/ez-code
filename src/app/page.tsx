@@ -13,10 +13,10 @@ const testAPI = async () => {
   const result = await model.generateContent(prompt);
   const response = result.response;
   const text = response.text();
-  console.log(text);
+  return text;
 };
 
-await testAPI();
+// const text = await testAPI();
 
 export default function HomePage() {
   return (
@@ -27,6 +27,7 @@ export default function HomePage() {
         </h1>
         <div className="mt-12 flex w-full justify-center">
           <span>hello</span>
+          {/* <span>{text}</span> */}
         </div>
       </div>
     </main>
