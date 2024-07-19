@@ -21,13 +21,16 @@ const testAPI = async () => {
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
+    <main className="flex min-h-screen flex-col items-center text-white">
       <div className="flex w-full flex-col items-center px-8 py-12">
         <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
           <span className="text-[hsl(280,100%,70%)]">ez</span>Code
         </h1>
         <div className="mt-12 flex w-full flex-col items-center gap-y-4">
-          <span>Add some code</span>
+          <span className="text-2xl font-bold">
+            Decypher some code
+            <span className="text-[hsl(280,100%,70%)]"></span>
+          </span>
           <TextInput />
           {/* <span>{text}</span> */}
         </div>
