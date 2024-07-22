@@ -5,9 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import { codeExplainQuery } from "../actions";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
-export const TextInput: React.FC = () => {
+export const Explainer: React.FC = () => {
   const [input, setInput] = useState<string>("");
-  const [showSimple, setShowSimple] = useState<boolean>(true);
 
   const mutation = useMutation({
     mutationFn: (prompt: string) => codeExplainQuery(prompt),
@@ -19,40 +18,39 @@ export const TextInput: React.FC = () => {
   };
 
   // console.log(mutation);
-
+  console.log(mutation.data);
   const responses = mutation.data?.split("## ").filter((x) => x !== "");
   const simpleResponse = responses?.[0];
   const complexResponse = responses?.[1];
-  console.log(responses);
+  // console.log(responses);
+
+  const complexString = complexResponse?.split(/\r?\n/);
+  console.log(complexString);
 
   return (
-    <div className="flex w-full max-w-6xl flex-col gap-y-8">
-      <textarea
-        className="min-h-[200px] min-w-[500px] rounded-lg bg-[#bdbdbd]/10 p-4 text-white shadow-lg"
-        value={input}
-        onChange={(e) => setInput(e.currentTarget.value)}
-        placeholder="code goes here!"
-        disabled={isPending}
-      />
+    <div className="flex w-full max-w-6xl flex-col">
+      <div className="flex w-full">
+        <textarea
+          className="min-h-[200px] w-full rounded-lg bg-[#bdbdbd]/10 p-4 text-white shadow-lg"
+          value={input}
+          onChange={(e) => setInput(e.currentTarget.value)}
+          placeholder="code goes here!"
+          disabled={isPending}
+        />
+      </div>
 
-      <div className="flex w-full items-center justify-center">
+      <div className="mt-4 flex w-full items-center justify-center sm:mt-8">
         <button
           type="submit"
           onClick={handleSubmit}
           className="h-[50px] rounded-full bg-[#6D0E7A]/90 px-8 py-2 tracking-wider shadow-lg hover:bg-[#6D0E7A] disabled:bg-[#6D0E7A]/50 disabled:text-white/50"
-          disabled={isPending}
+          disabled={isPending || !input}
         >
           EXPLAIN
         </button>
       </div>
 
-      <div className="flex">
-        <button></button>
-        <button></button>
-      </div>
-
-      {/* <div className="text-sm">{mutation.data}</div> */}
-      <div className="flex flex-col">
+      <div className="mt-4 flex flex-col sm:mt-8">
         <TabGroup>
           <TabList className="flex gap-4">
             <Tab className="rounded-full px-3 py-1 text-sm/6 font-semibold text-white focus:outline-none data-[hover]:bg-white/5 data-[selected]:bg-white/10 data-[selected]:data-[hover]:bg-white/10 data-[focus]:outline-1 data-[focus]:outline-white">
@@ -63,8 +61,14 @@ export const TextInput: React.FC = () => {
             </Tab>
           </TabList>
           <TabPanels className="relative mt-4 min-h-[200px] rounded-lg bg-[#bdbdbd]/10 p-4 shadow-lg">
+            {!mutation.data && (
+              <span className="text-white/50">explanation will come here!</span>
+            )}
             <TabPanel>{simpleResponse}</TabPanel>
-            <TabPanel>{complexResponse}</TabPanel>
+            <TabPanel className="flex flex-col gap-y-2">
+              {/* {complexResponse} */}
+              {complexString?.map((x) => <span key={x}>{x}</span>)}
+            </TabPanel>
             {isPending && (
               <div className="absolute left-[0%] top-[0%] flex h-full w-full items-center justify-center">
                 <svg
