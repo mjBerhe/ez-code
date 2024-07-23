@@ -17,15 +17,15 @@ export const Explainer: React.FC = () => {
     mutation.mutate(input);
   };
 
-  // console.log(mutation);
-  console.log(mutation.data);
   const responses = mutation.data?.split("## ").filter((x) => x !== "");
-  const simpleResponse = responses?.[0];
+  const simpleResponse = responses?.[0]?.split(/\r?\n/);
   const complexResponse = responses?.[1];
-  // console.log(responses);
 
-  const complexString = complexResponse?.split(/\r?\n/);
-  console.log(complexString);
+  const complexResponseSplit = complexResponse?.split(/\r?\n/);
+  const complexResponseCleaned = complexResponseSplit
+    ?.map((x) => x.split(/\**(.*?)\*/))
+    .flat()
+    .filter((y) => y !== "");
 
   return (
     <div className="flex w-full max-w-6xl flex-col">
@@ -64,10 +64,15 @@ export const Explainer: React.FC = () => {
             {!mutation.data && (
               <span className="text-white/50">explanation will come here!</span>
             )}
-            <TabPanel>{simpleResponse}</TabPanel>
+            <TabPanel className="flex flex-col gap-y-1">
+              {simpleResponse?.map((x, i) => (
+                <span key={`${x}-${i}`}>{x}</span>
+              ))}
+            </TabPanel>
             <TabPanel className="flex flex-col gap-y-2">
-              {/* {complexResponse} */}
-              {complexString?.map((x) => <span key={x}>{x}</span>)}
+              {complexResponseCleaned?.map((x, i) => (
+                <span key={`${x}-${i}`}>{x}</span>
+              ))}
             </TabPanel>
             {isPending && (
               <div className="absolute left-[0%] top-[0%] flex h-full w-full items-center justify-center">
