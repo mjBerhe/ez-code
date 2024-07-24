@@ -2,22 +2,38 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { codeExplainQuery } from "../actions";
+import { codeExplainQuery, codeImageExplainQuery } from "../actions";
+import { DragAndDrop } from "./fileInput";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 export const Explainer: React.FC = () => {
   const [input, setInput] = useState<string>("");
+  const [type, setType] = useState<"text" | "image">("text");
 
   const mutation = useMutation({
     mutationFn: (prompt: string) => codeExplainQuery(prompt),
   });
   const { isPending } = mutation;
 
+  const imageMutation = useMutation({
+    mutationFn: (variables: { path: string; type: string }) =>
+      codeImageExplainQuery(variables.path, variables.type),
+  });
+
   const handleSubmit = () => {
     mutation.mutate(input);
   };
 
-  const responses = mutation.data?.split("## ").filter((x) => x !== "");
+  const handleUpload = (path: string, type: string) => {
+    // mutation.mutate(path, type)
+    imageMutation.mutate({ path: path, type: type });
+  };
+
+  const responses = mutation.data
+    ? mutation.data?.split("## ").filter((x) => x !== "")
+    : imageMutation.data
+      ? imageMutation.data?.split("## ").filter((x) => x !== "")
+      : "";
   const simpleResponse = responses?.[0]?.split(/\r?\n/);
   const complexResponse = responses?.[1];
 
@@ -29,15 +45,31 @@ export const Explainer: React.FC = () => {
 
   return (
     <div className="flex w-full max-w-6xl flex-col">
-      <div className="flex w-full">
-        <textarea
-          className="min-h-[200px] w-full rounded-lg bg-[#bdbdbd]/10 p-4 text-white shadow-lg"
-          value={input}
-          onChange={(e) => setInput(e.currentTarget.value)}
-          placeholder="code goes here!"
-          disabled={isPending}
-        />
-      </div>
+      <TabGroup>
+        <TabList className="flex gap-4">
+          <Tab className="rounded-full px-3 py-1 text-sm/6 font-semibold text-white focus:outline-none data-[hover]:bg-white/5 data-[selected]:bg-white/10 data-[selected]:data-[hover]:bg-white/10 data-[focus]:outline-1 data-[focus]:outline-white">
+            Text
+          </Tab>
+          <Tab className="rounded-full px-3 py-1 text-sm/6 font-semibold text-white focus:outline-none data-[hover]:bg-white/5 data-[selected]:bg-white/10 data-[selected]:data-[hover]:bg-white/10 data-[focus]:outline-1 data-[focus]:outline-white">
+            Image
+          </Tab>
+        </TabList>
+        <TabPanels className="mt-4 flex w-full">
+          <TabPanel className="w-full">
+            <textarea
+              className="min-h-[200px] w-full rounded-lg bg-[#bdbdbd]/10 p-4 text-white shadow-lg"
+              value={input}
+              onChange={(e) => setInput(e.currentTarget.value)}
+              placeholder="code goes here!"
+              disabled={isPending}
+            />
+          </TabPanel>
+          <TabPanel>
+            <DragAndDrop handleUpload={handleUpload} />
+          </TabPanel>
+        </TabPanels>
+      </TabGroup>
+      <div className="flex w-full"></div>
 
       <div className="mt-4 flex w-full items-center justify-center sm:mt-8">
         <button
