@@ -41,6 +41,5 @@ export const codeImageExplainQuery = async (path: string, type: string) => {
   const result = await model.generateContent([prompt, ...imageParts]);
   const response = result.response;
   const text = response.text();
-  console.log(text);
   return text;
 };

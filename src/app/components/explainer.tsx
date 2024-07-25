@@ -8,32 +8,31 @@ import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 export const Explainer: React.FC = () => {
   const [input, setInput] = useState<string>("");
-  const [type, setType] = useState<"text" | "image">("text");
+  const [data, setData] = useState<string>("");
 
-  const mutation = useMutation({
+  const textMutation = useMutation({
     mutationFn: (prompt: string) => codeExplainQuery(prompt),
+    onSuccess: (data) => setData(data),
   });
-  const { isPending } = mutation;
+  const { isPending: isTextPending } = textMutation;
 
-  const imageMutation = useMutation({
+  const imgMutation = useMutation({
     mutationFn: (variables: { path: string; type: string }) =>
       codeImageExplainQuery(variables.path, variables.type),
+    onSuccess: (data) => setData(data),
   });
 
-  const handleSubmit = () => {
-    mutation.mutate(input);
+  const { isPending: isImgPending } = imgMutation;
+
+  const handleTextSubmit = () => {
+    textMutation.mutate(input);
   };
 
-  const handleUpload = (path: string, type: string) => {
-    // mutation.mutate(path, type)
-    imageMutation.mutate({ path: path, type: type });
+  const handleImgSubmit = (path: string, type: string) => {
+    imgMutation.mutate({ path: path, type: type });
   };
 
-  const responses = mutation.data
-    ? mutation.data?.split("## ").filter((x) => x !== "")
-    : imageMutation.data
-      ? imageMutation.data?.split("## ").filter((x) => x !== "")
-      : "";
+  const responses = data?.split("## ").filter((x) => x !== "");
   const simpleResponse = responses?.[0]?.split(/\r?\n/);
   const complexResponse = responses?.[1];
 
@@ -55,28 +54,27 @@ export const Explainer: React.FC = () => {
           </Tab>
         </TabList>
         <TabPanels className="mt-4 flex w-full">
-          <TabPanel className="w-full">
+          <TabPanel className="min-h-[200px] w-full">
             <textarea
-              className="min-h-[200px] w-full rounded-lg bg-[#bdbdbd]/10 p-4 text-white shadow-lg"
+              className="h-full w-full rounded-lg bg-[#bdbdbd]/10 p-4 text-white shadow-lg"
               value={input}
               onChange={(e) => setInput(e.currentTarget.value)}
               placeholder="code goes here!"
-              disabled={isPending}
+              disabled={isTextPending || isImgPending}
             />
           </TabPanel>
-          <TabPanel>
-            <DragAndDrop handleUpload={handleUpload} />
+          <TabPanel className="min-h-[200px] w-full">
+            <DragAndDrop handleUpload={handleImgSubmit} />
           </TabPanel>
         </TabPanels>
       </TabGroup>
-      <div className="flex w-full"></div>
 
       <div className="mt-4 flex w-full items-center justify-center sm:mt-8">
         <button
           type="submit"
-          onClick={handleSubmit}
+          onClick={handleTextSubmit}
           className="h-[50px] rounded-full bg-[#6D0E7A]/90 px-8 py-2 tracking-wider shadow-lg hover:bg-[#6D0E7A] disabled:bg-[#6D0E7A]/50 disabled:text-white/50"
-          disabled={isPending || !input}
+          disabled={isTextPending || isImgPending || !input}
         >
           EXPLAIN
         </button>
@@ -93,7 +91,7 @@ export const Explainer: React.FC = () => {
             </Tab>
           </TabList>
           <TabPanels className="relative mt-4 min-h-[200px] rounded-lg bg-[#bdbdbd]/10 p-4 shadow-lg">
-            {!mutation.data && (
+            {!data && (
               <span className="text-white/50">explanation will come here!</span>
             )}
             <TabPanel className="flex flex-col gap-y-1">
@@ -106,7 +104,7 @@ export const Explainer: React.FC = () => {
                 <span key={`${x}-${i}`}>{x}</span>
               ))}
             </TabPanel>
-            {isPending && (
+            {(isTextPending || isImgPending) && (
               <div className="absolute left-[0%] top-[0%] flex h-full w-full items-center justify-center">
                 <svg
                   className="h-8 w-8 animate-spin text-white"

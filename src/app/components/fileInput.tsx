@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { type FileWithPath, useDropzone } from "react-dropzone";
 import { fileURLToPath, FileUrlToPathOptions } from "url";
 
 export const DragAndDrop: React.FC<{
   handleUpload: (path: string, type: string) => void;
 }> = ({ handleUpload }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  console.log(isLoading);
+
   const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
+    setIsLoading(true);
     // Do something with the files
     const file = acceptedFiles[0];
 
@@ -24,17 +28,23 @@ export const DragAndDrop: React.FC<{
         base64String && handleUpload(base64String, file.type);
       };
     }
+    setIsLoading(false);
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <div {...getRootProps()}>
-      <input {...getInputProps()} />
-      {isDragActive ? (
-        <p>Drop the files here ...</p>
-      ) : (
-        <p>Drag &apos;n&apos; drop some files here, or click to select files</p>
-      )}
+    <div
+      {...getRootProps()}
+      className="flex h-full w-full rounded-lg bg-[#bdbdbd]/10 p-4 text-white shadow-lg"
+    >
+      <div className="flex h-full w-full cursor-pointer items-center justify-center rounded-lg border border-dashed">
+        <input {...getInputProps()} className="" />
+        {isDragActive ? (
+          <p className="p-2">Drop em here ...</p>
+        ) : (
+          <p className="p-2">Click to upload or drag &apos;n&apos; drop</p>
+        )}
+      </div>
     </div>
   );
 };
